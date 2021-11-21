@@ -31,5 +31,5 @@ data _≤_ : Typ → Typ → Set where
 ≤-refl : (A : Typ) → (A ≤ A)
 ≤-refl TInt = SInt
 ≤-refl TTop = STop
-≤-refl (A ⇒ A₁) = SArr (≤-refl A) (≤-refl A₁)
-≤-refl (A ∧ A₁) = SAnd (SAndL (≤-refl A)) (SAndR (≤-refl A₁))
+≤-refl (A ⇒ B) = SArr (≤-refl A) (≤-refl B)
+≤-refl (A ∧ B) = SAnd (SAndL (≤-refl A)) (SAndR (≤-refl B))

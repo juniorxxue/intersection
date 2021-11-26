@@ -56,10 +56,8 @@ data _⊢_⦂_ {n : ℕ} : Context n → Term n → Type → Set where
     → Γ ⊢ e₂ ⦂ A
     → Γ ⊢ app e₁ e₂ ⦂ B
 
-
 demo₂ : ∅ ⊢ app (abs Unit (var fzero)) * ⦂ Unit
 demo₂ = ⊢app (⊢abs (⊢var ∋-zero)) ⊢unit
-
 
 demo₃ : ∅ ⊢ abs (Unit ⇒ Unit) (abs Unit (app (var (fsuc fzero)) (var fzero))) ⦂ (Unit ⇒ Unit) ⇒ Unit ⇒ Unit
 demo₃ = ⊢abs (⊢abs (⊢app (⊢var (∋-suc ∋-zero)) (⊢var ∋-zero)))
@@ -105,11 +103,9 @@ data _↦_ {n : ℕ} : Term n → Term n → Set where
 
 
 data Progress {n : ℕ} : (e : Term n) → Set where
-
   step : ∀ {e e' : Term n}
      → e ↦ e'
      → Progress e
-
 
   done : ∀ {e : Term n}
      → Value e
@@ -132,7 +128,6 @@ canonical : ∀ {v : Term 0} {A : Type}
 canonical ⊢unit V = C-*
 canonical (⊢abs ⊢) V = C-abs ⊢
 canonical (⊢app ⊢e₁ ⊢e₂) ()
-
 
 progress : ∀ {e A}
   → ∅ ⊢ e ⦂ A

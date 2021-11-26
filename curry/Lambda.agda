@@ -1,4 +1,4 @@
-module intersection.DeBruijn where
+module curry.Lambda where
 
 open import Data.Nat using (ℕ; suc)
 open import Data.Fin using (Fin; _≟_ ; punchIn; punchOut) renaming (zero to fzero; suc to fsuc)

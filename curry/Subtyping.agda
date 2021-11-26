@@ -1,4 +1,4 @@
-module intersection.Subtyping where
+module curry.Subtyping where
 
 data Typ : Set where
   TInt : Typ

@@ -74,3 +74,59 @@ data _≤_ : Type → Type → Set where
     → B ≤ C
     → ord C
     → A & B ≤ C
+
+
+data proper : Type → Set where
+  pr-int :
+    proper Int
+
+  pr-top :
+    proper Top
+
+  pr-fun : ∀ {A B}
+    → ord B
+    → proper A
+    → proper B
+    → proper (A ⇒ B)
+
+  pr-split : ∀ {A A₁ A₂}
+    → A₁ ⇜ A ⇝ A₂
+    → proper A₁
+    → proper A₂
+    → proper A
+
+proper-⇒ : ∀ {A B : Type}
+  → proper A
+  → proper B
+  → proper (A ⇒ B)
+proper-⇒ pA pr-int = pr-fun ord-int pA pr-int
+proper-⇒ pA pr-top = pr-fun ord-top pA pr-top
+proper-⇒ pA (pr-fun x pB pB₁) = pr-fun (ord-⇒ x) pA (proper-⇒ pB pB₁)
+proper-⇒ pA (pr-split x pB pB₁) = pr-split (sp-⇒ x) (proper-⇒ pA pB) (proper-⇒ pA pB₁)
+
+proper-complete : ∀ (A : Type) → proper A
+proper-complete Int = pr-int
+proper-complete Top = pr-top
+proper-complete (A ⇒ B) = proper-⇒ (proper-complete A) (proper-complete B)
+proper-complete (A & B) = pr-split sp-& (proper-complete A) (proper-complete B)
+
+split-toplike-l : ∀ {A A₁ A₂ : Type}
+  → A₁ ⇜ A ⇝ A₂
+  → ⌉ A ⌈
+  → ⌉ A₁ ⌈
+split-toplike-l sp-& (tl-& tl₁ tl₂) = tl₁
+split-toplike-l (sp-⇒ Aˢ) (tl-⇒ tl) = tl-⇒ (split-toplike-l Aˢ tl)
+
+split-toplike-r : ∀ {A A₁ A₂ : Type}
+  → A₁ ⇜ A ⇝ A₂
+  → ⌉ A ⌈
+  → ⌉ A₂ ⌈
+split-toplike-r sp-& (tl-& tl₁ tl₂) = tl₂
+split-toplike-r (sp-⇒ Aˢ) (tl-⇒ tl) = tl-⇒ (split-toplike-r Aˢ tl)
+
+≤-toplike : ∀ {A B : Type} (p : proper A)
+  → ⌉ A ⌈
+  → B ≤ A
+≤-toplike pr-top tl = ≤-top ord-top tl
+≤-toplike (pr-fun Aᵒ p₁ p₂) tl = ≤-top (ord-⇒ Aᵒ) tl
+≤-toplike (pr-split Aˢ p₁ p₂) tl = ≤-& Aˢ (≤-toplike p₁ (split-toplike-l Aˢ tl)) (≤-toplike p₂ (split-toplike-r Aˢ tl))

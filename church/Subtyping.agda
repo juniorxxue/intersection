@@ -124,9 +124,10 @@ split-toplike-r : ∀ {A A₁ A₂ : Type}
 split-toplike-r sp-& (tl-& tl₁ tl₂) = tl₂
 split-toplike-r (sp-⇒ Aˢ) (tl-⇒ tl) = tl-⇒ (split-toplike-r Aˢ tl)
 
-≤-toplike : ∀ {A B : Type} (p : proper A)
+≤-toplike : ∀ {A B : Type}
   → ⌉ A ⌈
   → B ≤ A
-≤-toplike pr-top tl = ≤-top ord-top tl
-≤-toplike (pr-fun Aᵒ p₁ p₂) tl = ≤-top (ord-⇒ Aᵒ) tl
-≤-toplike (pr-split Aˢ p₁ p₂) tl = ≤-& Aˢ (≤-toplike p₁ (split-toplike-l Aˢ tl)) (≤-toplike p₂ (split-toplike-r Aˢ tl))
+≤-toplike {A} {B} tl with proper-complete A
+... | pr-top = ≤-top ord-top tl
+... | pr-fun Aᵒ p₁ p₂ = ≤-top (ord-⇒ Aᵒ) tl
+... | pr-split Aˢ p₁ p₂ = ≤-& Aˢ (≤-toplike (split-toplike-l Aˢ tl))  (≤-toplike (split-toplike-r Aˢ tl))

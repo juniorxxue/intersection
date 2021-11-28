@@ -124,10 +124,34 @@ split-toplike-r : ∀ {A A₁ A₂ : Type}
 split-toplike-r sp-& (tl-& tl₁ tl₂) = tl₂
 split-toplike-r (sp-⇒ Aˢ) (tl-⇒ tl) = tl-⇒ (split-toplike-r Aˢ tl)
 
-≤-toplike : ∀ {A B : Type}
-  → ⌉ A ⌈
-  → B ≤ A
-≤-toplike {A} {B} tl with proper-complete A
-... | pr-top = ≤-top ord-top tl
-... | pr-fun Aᵒ p₁ p₂ = ≤-top (ord-⇒ Aᵒ) tl
-... | pr-split Aˢ p₁ p₂ = ≤-& Aˢ (≤-toplike (split-toplike-l Aˢ tl))  (≤-toplike (split-toplike-r Aˢ tl))
+
+≤-toplike : ∀ {A B : Type} → ⌉ A ⌈ → B ≤ A
+≤-toplike {A} {B} = ≤-toplike-p {A} {B} {proper-complete A}
+  where
+  ≤-toplike-p : ∀ {A} {B} {p : proper A} → ⌉ A ⌈ → B ≤ A
+  ≤-toplike-p {p = pr-top} tl = ≤-top ord-top tl
+  ≤-toplike-p {p = pr-fun x p p₁} tl = ≤-top (ord-⇒ x) tl
+  ≤-toplike-p {p = pr-split Aᵒ p₁ p₂} tl = ≤-& Aᵒ (≤-toplike-p {p = p₁} (split-toplike-l Aᵒ tl)) (≤-toplike-p {p = p₂} (split-toplike-r Aᵒ tl))
+
+_ : ∀ {A} → ⌉ A ⌈ → Int ≤ A
+_ = ≤-toplike
+
+-- https://github.com/agda/agda/blob/v2.6.1/CHANGELOG.md#termination-checking
+
+-- split or ordinary
+data Split (A : Type) : Set where
+  sp-step : ∀ {A₁ A₂}
+    → A₁ ⇜ A ⇝ A₂
+    → Split A
+
+  sp-done :
+      ord A
+    → Split A
+    
+split : ∀ (A : Type) → Split A
+split Int = sp-done ord-int
+split Top = sp-done ord-top
+split (A ⇒ B) with split B
+... | sp-step Bˢ = sp-step (sp-⇒ Bˢ)
+... | sp-done Bᵒ = sp-done (ord-⇒ Bᵒ)
+split (A & B) = sp-step sp-&

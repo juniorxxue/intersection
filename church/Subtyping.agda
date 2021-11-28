@@ -59,6 +59,12 @@ data _≤_ : Type → Type → Set where
     → ⌉ B ⌈
     → A ≤ B
 
+  ≤-⇒ : ∀ {A B C D}
+    → C ≤ A
+    → B ≤ D
+    → ord D
+    → A ⇒ B ≤ C ⇒ D
+
   ≤-& : ∀ {A B B₁ B₂}
     → B₁ ⇜ B ⇝ B₂
     → A ≤ B₁
@@ -155,3 +161,44 @@ split (A ⇒ B) with split B
 ... | sp-step Bˢ = sp-step (sp-⇒ Bˢ)
 ... | sp-done Bᵒ = sp-done (ord-⇒ Bᵒ)
 split (A & B) = sp-step sp-&
+
+-- fully generated proof
+≤-⇒-gen : ∀ {A B C D}
+  → B ≤ D
+  → C ≤ A
+  → A ⇒ B ≤ C ⇒ D
+≤-⇒-gen ≤-int ≤₂ = ≤-⇒ ≤₂ ≤-int ord-int
+≤-⇒-gen (≤-top x x₁) ≤₂ = ≤-⇒ ≤₂ (≤-top x x₁) x
+≤-⇒-gen (≤-⇒ ≤₁ ≤₃ x) ≤₂ = ≤-⇒ ≤₂ (≤-⇒-gen ≤₃ ≤₁) (ord-⇒ x)
+≤-⇒-gen (≤-& x ≤₁ ≤₃) ≤₂ = ≤-& (sp-⇒ x) (≤-⇒-gen ≤₁ ≤₂) (≤-⇒-gen ≤₃ ≤₂)
+≤-⇒-gen (≤-&-l ≤₁ x) ≤₂ = ≤-⇒ ≤₂ (≤-&-l ≤₁ x) x
+≤-⇒-gen (≤-&-r ≤₁ x) ≤₂ = ≤-⇒ ≤₂ (≤-&-r ≤₁ x) x
+
+-- fully generated proof
+≤-&-l-gen : ∀ {A B C}
+  → A ≤ C
+  → A & B ≤ C
+≤-&-l-gen ≤-int = ≤-&-l ≤-int ord-int
+≤-&-l-gen (≤-top x x₁) = ≤-top x x₁
+≤-&-l-gen (≤-⇒ s s₁ x) = ≤-&-l (≤-⇒ s s₁ x) (ord-⇒ x)
+≤-&-l-gen (≤-& x s s₁) = ≤-& x (≤-&-l-gen s) (≤-&-l-gen s₁)
+≤-&-l-gen (≤-&-l s x) = ≤-&-l (≤-&-l-gen s) x
+≤-&-l-gen (≤-&-r s x) = ≤-&-l (≤-&-r s x) x
+
+-- fully generated proof
+≤-&-r-gen : ∀ {A B C}
+  → B ≤ C
+  → A & B ≤ C
+≤-&-r-gen ≤-int = ≤-&-r ≤-int ord-int
+≤-&-r-gen (≤-top x x₁) = ≤-top x x₁
+≤-&-r-gen (≤-⇒ s s₁ x) = ≤-&-r (≤-⇒ s s₁ x) (ord-⇒ x)
+≤-&-r-gen (≤-& x s s₁) = ≤-& x (≤-&-r-gen s) (≤-&-r-gen s₁)
+≤-&-r-gen (≤-&-l s x) = ≤-&-r (≤-&-l s x) x
+≤-&-r-gen (≤-&-r s x) = ≤-&-r (≤-&-r-gen s) x
+
+≤-refl : ∀ {A}
+  → A ≤ A
+≤-refl {Int} = ≤-int
+≤-refl {Top} = ≤-top ord-top tl-top
+≤-refl {A ⇒ B} = ≤-⇒-gen ≤-refl ≤-refl
+≤-refl {A & B} = ≤-& sp-& (≤-&-l-gen ≤-refl) (≤-&-r-gen ≤-refl)

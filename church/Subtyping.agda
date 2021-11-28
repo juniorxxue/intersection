@@ -1,5 +1,8 @@
 module church.Subtyping where
 
+import Relation.Binary.PropositionalEquality as Eq
+open Eq using (_≡_; refl; cong)
+
 infixr 7 _⇒_
 infixr 7 _&_
 infix 5 _⇜_⇝_
@@ -202,3 +205,39 @@ split (A & B) = sp-step sp-&
 ≤-refl {Top} = ≤-top ord-top tl-top
 ≤-refl {A ⇒ B} = ≤-⇒-gen ≤-refl ≤-refl
 ≤-refl {A & B} = ≤-& sp-& (≤-&-l-gen ≤-refl) (≤-&-r-gen ≤-refl)
+
+sp-≤-l : ∀ {A A₁ A₂}
+  → A₁ ⇜ A ⇝ A₂
+  → A ≤ A₁
+sp-≤-l sp-& = ≤-&-l-gen ≤-refl
+sp-≤-l (sp-⇒ Bˢ) = ≤-⇒-gen (sp-≤-l Bˢ) ≤-refl
+
+sp-≤-r : ∀ {A A₁ A₂}
+  → A₁ ⇜ A ⇝ A₂
+  → A ≤ A₂
+sp-≤-r sp-& = ≤-&-r-gen ≤-refl
+sp-≤-r (sp-⇒ Bˢ) = ≤-⇒-gen (sp-≤-r Bˢ) ≤-refl
+
+sp-determinism₁ : ∀ {A A₁ A₂ A₃ A₄}
+  → A₁ ⇜ A ⇝ A₂
+  → A₃ ⇜ A ⇝ A₄
+  → A₁ ≡ A₃
+sp-determinism₁ sp-& sp-& = refl
+sp-determinism₁ (sp-⇒ {B} Aˢ₁) (sp-⇒ {B} Aˢ₂) = cong (_⇒_ B) (sp-determinism₁ Aˢ₁ Aˢ₂)
+
+sp-determinism₂ : ∀ {A A₁ A₂ A₃ A₄}
+  → A₁ ⇜ A ⇝ A₂
+  → A₃ ⇜ A ⇝ A₄
+  → A₂ ≡ A₄
+sp-determinism₂ sp-& sp-& = refl
+sp-determinism₂ (sp-⇒ {B} Aˢ₁) (sp-⇒ {B} Aˢ₂) = cong (_⇒_ B) (sp-determinism₂ Aˢ₁ Aˢ₂)
+
+≤-sp-l : ∀ {A B B₁ B₂}
+  → A ≤ B
+  → B₁ ⇜ B ⇝ B₂
+  → A ≤ B₁
+≤-sp-l (≤-top x x₁) Bˢ = {!!}
+≤-sp-l (≤-⇒ A≤B A≤B₁ x) Bˢ = {!!}
+≤-sp-l (≤-& x A≤B A≤B₁) Bˢ = {!!}
+≤-sp-l (≤-&-l A≤B x) Bˢ = {!!}
+≤-sp-l (≤-&-r A≤B x) Bˢ = {!!}

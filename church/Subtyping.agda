@@ -2,6 +2,8 @@ module church.Subtyping where
 
 import Relation.Binary.PropositionalEquality as Eq
 open Eq using (_≡_; refl; cong)
+open import Relation.Nullary using (¬_)
+open import Data.Empty using (⊥; ⊥-elim)
 
 infixr 7 _⇒_
 infixr 7 _&_
@@ -232,12 +234,17 @@ sp-determinism₂ : ∀ {A A₁ A₂ A₃ A₄}
 sp-determinism₂ sp-& sp-& = refl
 sp-determinism₂ (sp-⇒ {B} Aˢ₁) (sp-⇒ {B} Aˢ₂) = cong (_⇒_ B) (sp-determinism₂ Aˢ₁ Aˢ₂)
 
+sp-¬ord : ∀ {A A₁ A₂}
+  → A₁ ⇜ A ⇝ A₂
+  → ¬ ord A
+sp-¬ord (sp-⇒ Aˢ) (ord-⇒ Aᵒ) = sp-¬ord Aˢ Aᵒ
+
 ≤-sp-l : ∀ {A B B₁ B₂}
   → A ≤ B
   → B₁ ⇜ B ⇝ B₂
   → A ≤ B₁
-≤-sp-l (≤-top x x₁) Bˢ = {!!}
-≤-sp-l (≤-⇒ A≤B A≤B₁ x) Bˢ = {!!}
-≤-sp-l (≤-& x A≤B A≤B₁) Bˢ = {!!}
-≤-sp-l (≤-&-l A≤B x) Bˢ = {!!}
-≤-sp-l (≤-&-r A≤B x) Bˢ = {!!}
+≤-sp-l (≤-top Bᵒ tl) Bˢ = ⊥-elim (sp-¬ord Bˢ Bᵒ)
+≤-sp-l (≤-⇒ B≤D C≤A Dᵒ) (sp-⇒ Dˢ) = ⊥-elim (sp-¬ord Dˢ Dᵒ)
+≤-sp-l (≤-& Bˢ₁ A≤B₃ A≤B₄) Bˢ₂ rewrite sp-determinism₁ Bˢ₁ Bˢ₂ = A≤B₃
+≤-sp-l (≤-&-l A≤B₂ B₂ᵒ) B₂ˢ = ⊥-elim (sp-¬ord B₂ˢ B₂ᵒ)
+≤-sp-l (≤-&-r B≤B₂ B₂ᵒ) B₂ˢ = ⊥-elim (sp-¬ord B₂ˢ B₂ᵒ)

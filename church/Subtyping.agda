@@ -1,4 +1,4 @@
-module church.Subtyping where
+    module church.Subtyping where
 
 import Relation.Binary.PropositionalEquality as Eq
 open Eq using (_≡_; refl; cong)
@@ -248,3 +248,20 @@ sp-¬ord (sp-⇒ Aˢ) (ord-⇒ Aᵒ) = sp-¬ord Aˢ Aᵒ
 ≤-sp-l (≤-& Bˢ₁ A≤B₃ A≤B₄) Bˢ₂ rewrite sp-determinism₁ Bˢ₁ Bˢ₂ = A≤B₃
 ≤-sp-l (≤-&-l A≤B₂ B₂ᵒ) B₂ˢ = ⊥-elim (sp-¬ord B₂ˢ B₂ᵒ)
 ≤-sp-l (≤-&-r B≤B₂ B₂ᵒ) B₂ˢ = ⊥-elim (sp-¬ord B₂ˢ B₂ᵒ)
+
+≤-trans-p : ∀ {A B C : Type} {p : proper B} → A ≤ B → B ≤ C → A ≤ C
+≤-trans-p {B = .Int} {p = pr-int} A≤B ≤-int = A≤B
+≤-trans-p {B = .Int} {p = pr-int} A≤B (≤-top x x₁) = ≤-top x x₁
+≤-trans-p {B = .Int} {p = pr-int} A≤B (≤-& x B≤C B≤C₁) = ≤-& x (≤-trans-p {p = pr-int} A≤B B≤C) (≤-trans-p {p = pr-int} A≤B B≤C₁)
+≤-trans-p {B = .Top} {p = pr-top} A≤B (≤-top x x₁) = ≤-top x x₁
+≤-trans-p {B = .Top} {p = pr-top} A≤B (≤-& x B≤C B≤C₁) = ≤-& x (≤-trans-p {p = pr-top} A≤B B≤C) (≤-trans-p {p = pr-top} A≤B B≤C₁)
+≤-trans-p {B = .(_ ⇒ _)} {p = pr-fun Bᵒ p₁ p₂} A≤B (≤-top x x₁) = ≤-top x x₁
+≤-trans-p {B = .(_ ⇒ _)} {p = pr-fun Bᵒ p₁ p₂} A≤B (≤-⇒ B≤C B≤C₁ x) = {!!}
+≤-trans-p {B = .(_ ⇒ _)} {p = pr-fun Bᵒ p₁ p₂} A≤B (≤-& x B≤C B≤C₁) = ≤-& x (≤-trans-p {p = pr-fun Bᵒ p₁ p₂} A≤B B≤C) (≤-trans-p {p = pr-fun Bᵒ p₁ p₂} A≤B B≤C₁)
+≤-trans-p {B = B} {p = pr-split x p p₁} A≤B B≤C = {!!}
+
+≤-trans : ∀ {A B C}
+  → A ≤ B
+  → B ≤ C
+  → A ≤ C
+≤-trans = {!!}  

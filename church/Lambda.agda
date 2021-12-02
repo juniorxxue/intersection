@@ -129,7 +129,7 @@ data _⟿_ : ∀ {Γ A} → (Γ ⊢ A) → (Γ ⊢ A) → Set where
   β-ƛ : ∀ {Γ A B} {N : Γ , A ⊢ B} {W : Γ ⊢ A}
     → Value W
     → (ƛ N) ∙ W ⟿ N [ W ]
-
+    
 data Progress {A} (M : ∅ ⊢ A) : Set where
   step : ∀ {N : ∅ ⊢ A}
     → M ⟿ N

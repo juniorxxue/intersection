@@ -291,6 +291,7 @@ sp-iso sp-A = ≤-& sp-& (sp-≤-l sp-A) (sp-≤-r sp-A)
 ≤-inv-sp-r (≤-&-l A≤B₂ B₂ᵒ) B₂ˢ = ⊥-elim (sp-¬ord B₂ˢ B₂ᵒ)
 ≤-inv-sp-r (≤-&-r B≤B₂ B₂ᵒ) B₂ˢ = ⊥-elim (sp-¬ord B₂ˢ B₂ᵒ)
 
+
 ≤-toplike-preservation : ∀ {A B : Type}
   → ⌉ A ⌈
   → A ≤ B
@@ -325,7 +326,34 @@ proper-inv-split-r sp-A (pr-split x p-A p-A₁) rewrite sp-determinism₂ x sp-A
 ≤-trans-p (pr-fun ord-B p₁ p₂) pC (≤-top (ord-⇒ ord-B′) (tl-⇒ tl-B)) (≤-⇒ ≤₁ ≤₂ ord-D) = ≤-top (ord-⇒ ord-D) (tl-⇒ (≤-toplike-preservation tl-B ≤₂))
 ≤-trans-p (pr-fun ord-B p₁ p₂) pC (≤-⇒ {A = A} ≤₃ ≤₄ ord-B₁) (≤-⇒ {D = D} ≤₁ ≤₂ ord-D) = ≤-⇒ (≤-trans-p p₁ (proper-complete A) ≤₁ ≤₃) (≤-trans-p p₂ (proper-complete D) ≤₄ ≤₂) ord-D
 ≤-trans-p (pr-fun ord-B p₁ p₂) pC (≤-& (sp-⇒ sp-B) ≤₃ ≤₄) (≤-⇒ ≤₁ ≤₂ ord-D) = ⊥-elim (sp-¬ord sp-B ord-B)
-≤-trans-p (pr-fun ord-B p₁ p₂) pC (≤-&-l A≤B (ord-⇒ ord-B₁)) (≤-⇒ ≤₁ ≤₂ ord-D) = ≤-&-l-gen (≤-trans-p (pr-fun ord-B₁ p₁ p₂) pC A≤B (≤-⇒ ≤₁ ≤₂ ord-D)) -- kinda dangerous
+≤-trans-p (pr-fun ord-B p₁ p₂) pC (≤-&-l A≤B (ord-⇒ ord-B₁)) (≤-⇒ ≤₁ ≤₂ ord-D) = ≤-&-l-gen (≤-trans-p (pr-fun ord-B₁ p₁ p₂) pC A≤B (≤-⇒ ≤₁ ≤₂ ord-D))
 ≤-trans-p (pr-fun ord-B p₁ p₂) pC (≤-&-r A≤B (ord-⇒ ord-B₁)) (≤-⇒ ≤₁ ≤₂ ord-D) = ≤-&-r-gen (≤-trans-p (pr-fun ord-B₁ p₁ p₂) pC A≤B (≤-⇒ ≤₁ ≤₂ ord-D))
 ≤-trans-p (pr-fun ord-B p₁ p₂) pC A≤B (≤-& {B₁ = B₁} {B₂ = B₂} sp-C ≤₁ ≤₂) = ≤-& sp-C (≤-trans-p (pr-fun ord-B p₁ p₂) (proper-complete B₁) A≤B ≤₁) (≤-trans-p (pr-fun ord-B p₁ p₂) (proper-complete B₂) A≤B ≤₂)
-≤-trans-p (pr-split sp-B p₁ p₂) pC A≤B B≤C = {!!}
+≤-trans-p (pr-split sp-B p₁ p₂) pr-int A≤B B≤C with ≤-trans-p p₁ pr-int (≤-inv-sp-l A≤B sp-B) |  ≤-trans-p p₂ pr-int (≤-inv-sp-r A≤B sp-B) | ≤-inv-sp-ord B≤C sp-B ord-int
+... | rec | _ | inj₁ x = rec x
+... | _ | rec | inj₂ y = rec y
+≤-trans-p (pr-split sp-B p₁ p₂) pr-top A≤B B≤C = {!!}
+≤-trans-p (pr-split sp-B p₁ p₂) (pr-fun x pC pC₁) A≤B B≤C = {!!}
+≤-trans-p (pr-split sp-B p₁ p₂) (pr-split x pC pC₁) A≤B B≤C = {!!}
+
+≤-trans-p-explicit : ∀ {A B C : Type} → proper B → proper C → A ≤ B → B ≤ C → A ≤ C
+≤-trans-p-explicit {A} {.Int} {.Int} pr-int pC A≤B ≤-int = A≤B
+≤-trans-p-explicit {A} {.Int} {C} pr-int pC A≤B (≤-top x x₁) = ≤-top x x₁
+≤-trans-p-explicit {A} {.Int} {C} pr-int pC A≤B (≤-& {B₁ = B₁} {B₂ = B₂} x B≤C B≤C₁) = ≤-& x (≤-trans-p-explicit pr-int (proper-complete B₁) A≤B B≤C) (≤-trans-p-explicit pr-int (proper-complete B₂) A≤B B≤C₁)
+≤-trans-p-explicit {A} {.Top} {C} pr-top pC A≤B (≤-top x x₁) = ≤-top x x₁
+≤-trans-p-explicit {A} {.Top} {C} pr-top pC A≤B (≤-& {B₁ = B₁} {B₂ = B₂} x B≤C B≤C₁) = ≤-& x (≤-trans-p-explicit pr-top (proper-complete B₁) A≤B B≤C) (≤-trans-p-explicit pr-top (proper-complete B₂) A≤B B≤C₁)
+≤-trans-p-explicit {A} {.(_ ⇒ _)} {C} (pr-fun x pB pB₁) pC A≤B (≤-top x₁ x₂) = ≤-top x₁ x₂
+≤-trans-p-explicit {A} {.(_ ⇒ _)} {.(_ ⇒ _)} (pr-fun x pB pB₁) pC (≤-top x₂ (tl-⇒ x₃)) (≤-⇒ B≤C B≤C₁ x₁) = ≤-top (ord-⇒ x₁) (tl-⇒ (≤-toplike-preservation x₃ B≤C₁))
+≤-trans-p-explicit {.(_ ⇒ _)} {.(_ ⇒ _)} {.(_ ⇒ _)} (pr-fun x pB pB₁) pC (≤-⇒ {A = A} A≤B A≤B₁ x₂) (≤-⇒ {D = D} B≤C B≤C₁ x₁) =  ≤-⇒ (≤-trans-p-explicit pB (proper-complete A) B≤C A≤B) (≤-trans-p-explicit pB₁ (proper-complete D) A≤B₁ B≤C₁) x₁
+≤-trans-p-explicit {A} {.(_ ⇒ _)} {.(_ ⇒ _)} (pr-fun x pB pB₁) pC (≤-& (sp-⇒ x₂) A≤B A≤B₁) (≤-⇒ B≤C B≤C₁ x₁) = ⊥-elim (sp-¬ord x₂ x)
+≤-trans-p-explicit {.(_ & _)} {.(_ ⇒ _)} {.(_ ⇒ _)} (pr-fun x pB pB₁) pC (≤-&-l A≤B x₂) (≤-⇒ B≤C B≤C₁ x₁) = ≤-&-l-gen (≤-trans-p-explicit (pr-fun x pB pB₁) pC A≤B (≤-⇒ B≤C B≤C₁ x₁))
+≤-trans-p-explicit {.(_ & _)} {.(_ ⇒ _)} {.(_ ⇒ _)} (pr-fun x pB pB₁) pC (≤-&-r A≤B x₂) (≤-⇒ B≤C B≤C₁ x₁) = ≤-&-r-gen (≤-trans-p-explicit (pr-fun x pB pB₁) pC A≤B (≤-⇒ B≤C B≤C₁ x₁))
+≤-trans-p-explicit {A} {.(_ ⇒ _)} {C} (pr-fun x pB pB₁) pC A≤B (≤-& {B₁ = B₁} {B₂ = B₂} x₁ B≤C B≤C₁) = ≤-& x₁ (≤-trans-p-explicit (pr-fun x pB pB₁) (proper-complete B₁) A≤B B≤C) (≤-trans-p-explicit (pr-fun x pB pB₁) (proper-complete B₂) A≤B B≤C₁)
+≤-trans-p-explicit {A} {B} {.Int} (pr-split x pB pB₁) pr-int A≤B B≤C with ≤-inv-sp-ord B≤C x ord-int
+... | inj₁ x₁ = ≤-trans-p-explicit pB pr-int (≤-inv-sp-l A≤B x) x₁
+... | inj₂ y = ≤-trans-p-explicit pB₁ pr-int (≤-inv-sp-r A≤B x) y
+≤-trans-p-explicit {A} {B} {.Top} (pr-split x pB pB₁) pr-top A≤B B≤C = ≤-top ord-top tl-top
+≤-trans-p-explicit {A} {B} {.(_ ⇒ _)} (pr-split x pB pB₁) (pr-fun x₁ pC pC₁) A≤B B≤C with ≤-inv-sp-ord B≤C x (ord-⇒ x₁)
+... | inj₁ x₂ = ≤-trans-p-explicit pB (pr-fun x₁ pC pC₁) (≤-inv-sp-l A≤B x) x₂
+... | inj₂ y = ≤-trans-p-explicit pB₁ (pr-fun x₁ pC pC₁) (≤-inv-sp-r A≤B x) y
+≤-trans-p-explicit {A} {B} {C} (pr-split x pB pB₁) (pr-split x₁ pC pC₁) A≤B B≤C = ≤-& x₁ (≤-trans-p-explicit (pr-split x pB pB₁) pC A≤B (≤-inv-sp-l B≤C x₁)) (≤-trans-p-explicit (pr-split x pB pB₁) pC₁ A≤B (≤-inv-sp-r B≤C x₁))

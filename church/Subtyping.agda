@@ -317,22 +317,15 @@ proper-inv-split-r sp-A (pr-split x p-A p-A₁) rewrite sp-determinism₂ x sp-A
 
 ≤-trans-p : ∀ {A B C : Type} → proper B → proper C → A ≤ B → B ≤ C → A ≤ C
 ≤-trans-p pr-int pC A≤B ≤-int = A≤B
-≤-trans-p pr-int pC A≤B (≤-top tl-C ord-C) = ≤-top tl-C ord-C
-≤-trans-p pr-int (pr-fun x pC pC₁) A≤B (≤-& sp-C ≤₁ ≤₂) = ⊥-elim (sp-¬ord sp-C (ord-⇒ x))
-≤-trans-p pr-int (pr-split x pB₁ pB₂) A≤B (≤-& sp-C ≤₁ ≤₂) = {!!}
-≤-trans-p pr-top pC A≤B B≤C = {!!}
-≤-trans-p (pr-fun x pB pB₁) pC A≤B (≤-top x₁ x₂) = ≤-top x₁ x₂
-≤-trans-p (pr-fun x pB pB₁) pC (≤-top x₂ (tl-⇒ x₃)) (≤-⇒ B≤C B≤C₁ x₁) = ≤-toplike (tl-⇒ (≤-toplike-preservation x₃ B≤C₁))
-≤-trans-p (pr-fun x pB pB₁) pC (≤-⇒ A≤B A≤B₁ x₂) (≤-⇒ {D = D} B≤C B≤C₁ x₁) = ≤-⇒ (≤-trans-p pB {!!} B≤C A≤B) (≤-trans-p pB₁ {!!} A≤B₁ B≤C₁) x₁
-≤-trans-p (pr-fun x pB pB₁) pC (≤-& (sp-⇒ x₂) A≤B A≤B₁) (≤-⇒ B≤C B≤C₁ x₁) = ⊥-elim (sp-¬ord x₂ x)
-≤-trans-p (pr-fun x pB pB₁) pC (≤-&-l A≤B x₂) (≤-⇒ B≤C B≤C₁ x₁) = ≤-&-l-gen (≤-trans-p (pr-fun x pB pB₁) pC A≤B (≤-⇒ B≤C B≤C₁ x₁))
-≤-trans-p (pr-fun x pB pB₁) pC (≤-&-r A≤B x₂) (≤-⇒ B≤C B≤C₁ x₁) = ≤-&-r-gen (≤-trans-p (pr-fun x pB pB₁) pC A≤B (≤-⇒ B≤C B≤C₁ x₁))
-≤-trans-p (pr-fun x pB pB₁) pC A≤B (≤-& {B₁ = B₁} {B₂ = B₂} x₁ B≤C B≤C₁) = ≤-& x₁ (≤-trans-p (pr-fun x pB pB₁) (proper-inv-split-l x₁ pC) A≤B B≤C) (≤-trans-p (pr-fun x pB pB₁) (proper-inv-split-r x₁ pC) A≤B B≤C₁)
-≤-trans-p (pr-split sp-B pB pB₁) pr-int A≤B B≤C with ≤-inv-sp-ord B≤C sp-B ord-int
-... | inj₁ x = ≤-trans-p pB pr-int (≤-inv-sp-l A≤B sp-B) x
-... | inj₂ y = ≤-trans-p pB₁ pr-int (≤-inv-sp-r A≤B sp-B) y
-≤-trans-p (pr-split x pB pB₁) pr-top A≤B B≤C = ≤-top ord-top tl-top
-≤-trans-p (pr-split sp-B pB pB₁) (pr-fun x₁ pC pC₁) A≤B B≤C with ≤-inv-sp-ord B≤C sp-B (ord-⇒ x₁)
-... | inj₁ x = ≤-trans-p pB (pr-fun x₁ pC pC₁) (≤-inv-sp-l A≤B sp-B) x
-... | inj₂ y = ≤-trans-p pB₁ (pr-fun x₁ pC pC₁) (≤-inv-sp-r A≤B sp-B) y
-≤-trans-p (pr-split x pB pB₁) (pr-split x₁ pC pC₁) A≤B B≤C = ≤-& x₁ (≤-trans-p (pr-split x pB pB₁) pC A≤B (≤-inv-sp-l B≤C x₁)) (≤-trans-p (pr-split x pB pB₁) pC₁ A≤B (≤-inv-sp-r B≤C x₁))
+≤-trans-p pr-int pC A≤B (≤-top ord-C tl-C) = ≤-top ord-C tl-C
+≤-trans-p pr-int pC A≤B (≤-& {B₁ = B₁} {B₂ = B₂} sp-C ≤₁ ≤₂) = ≤-& sp-C (≤-trans-p pr-int (proper-complete B₁) A≤B ≤₁) (≤-trans-p pr-int (proper-complete B₂) A≤B ≤₂)
+≤-trans-p pr-top pC A≤B (≤-top ord-C tl-C) = ≤-top ord-C tl-C
+≤-trans-p pr-top pC A≤B (≤-& {B₁ = B₁} {B₂ = B₂} sp-C ≤₁ ≤₂) = ≤-& sp-C (≤-trans-p pr-top (proper-complete B₁) A≤B ≤₁) (≤-trans-p pr-top (proper-complete B₂) A≤B ≤₂)
+≤-trans-p (pr-fun ord-B p₁ p₂) pC A≤B (≤-top ord-C tl-C) = ≤-top ord-C tl-C
+≤-trans-p (pr-fun ord-B p₁ p₂) pC (≤-top (ord-⇒ ord-B′) (tl-⇒ tl-B)) (≤-⇒ ≤₁ ≤₂ ord-D) = ≤-top (ord-⇒ ord-D) (tl-⇒ (≤-toplike-preservation tl-B ≤₂))
+≤-trans-p (pr-fun ord-B p₁ p₂) pC (≤-⇒ {A = A} ≤₃ ≤₄ ord-B₁) (≤-⇒ {D = D} ≤₁ ≤₂ ord-D) = ≤-⇒ (≤-trans-p p₁ (proper-complete A) ≤₁ ≤₃) (≤-trans-p p₂ (proper-complete D) ≤₄ ≤₂) ord-D
+≤-trans-p (pr-fun ord-B p₁ p₂) pC (≤-& (sp-⇒ sp-B) ≤₃ ≤₄) (≤-⇒ ≤₁ ≤₂ ord-D) = ⊥-elim (sp-¬ord sp-B ord-B)
+≤-trans-p (pr-fun ord-B p₁ p₂) pC (≤-&-l A≤B (ord-⇒ ord-B₁)) (≤-⇒ ≤₁ ≤₂ ord-D) = ≤-&-l-gen (≤-trans-p (pr-fun ord-B₁ p₁ p₂) pC A≤B (≤-⇒ ≤₁ ≤₂ ord-D)) -- kinda dangerous
+≤-trans-p (pr-fun ord-B p₁ p₂) pC (≤-&-r A≤B (ord-⇒ ord-B₁)) (≤-⇒ ≤₁ ≤₂ ord-D) = ≤-&-r-gen (≤-trans-p (pr-fun ord-B₁ p₁ p₂) pC A≤B (≤-⇒ ≤₁ ≤₂ ord-D))
+≤-trans-p (pr-fun ord-B p₁ p₂) pC A≤B (≤-& {B₁ = B₁} {B₂ = B₂} sp-C ≤₁ ≤₂) = ≤-& sp-C (≤-trans-p (pr-fun ord-B p₁ p₂) (proper-complete B₁) A≤B ≤₁) (≤-trans-p (pr-fun ord-B p₁ p₂) (proper-complete B₂) A≤B ≤₂)
+≤-trans-p (pr-split sp-B p₁ p₂) pC A≤B B≤C = {!!}

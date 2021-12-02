@@ -1,9 +1,10 @@
-    module church.Subtyping where
+module church.Subtyping where
 
 import Relation.Binary.PropositionalEquality as Eq
-open Eq using (_≡_; refl; cong)
+open Eq using (_≡_; refl; cong; subst)
 open import Relation.Nullary using (¬_)
 open import Data.Empty using (⊥; ⊥-elim)
+open import Data.Sum using (_⊎_; inj₁; inj₂) 
 
 infixr 7 _⇒_
 infixr 7 _&_
@@ -208,6 +209,14 @@ split (A & B) = sp-step sp-&
 ≤-refl {A ⇒ B} = ≤-⇒-gen ≤-refl ≤-refl
 ≤-refl {A & B} = ≤-& sp-& (≤-&-l-gen ≤-refl) (≤-&-r-gen ≤-refl)
 
+sp-toplike : ∀ {A A₁ A₂}
+  → A₁ ⇜ A ⇝ A₂
+  → ⌉ A₁ ⌈
+  → ⌉ A₂ ⌈
+  → ⌉ A ⌈
+sp-toplike sp-& tl₁ tl₂ = tl-& tl₁ tl₂
+sp-toplike (sp-⇒ sp) (tl-⇒ tl₁) (tl-⇒ tl₂) = tl-⇒ (sp-toplike sp tl₁ tl₂)
+
 sp-≤-l : ∀ {A A₁ A₂}
   → A₁ ⇜ A ⇝ A₂
   → A ≤ A₁
@@ -239,15 +248,53 @@ sp-¬ord : ∀ {A A₁ A₂}
   → ¬ ord A
 sp-¬ord (sp-⇒ Aˢ) (ord-⇒ Aᵒ) = sp-¬ord Aˢ Aᵒ
 
-≤-sp-l : ∀ {A B B₁ B₂}
+sp-iso : ∀ {A A₁ A₂}
+  → A₁ ⇜ A ⇝ A₂
+  → A ≤ (A₁ & A₂)
+sp-iso sp-A = ≤-& sp-& (sp-≤-l sp-A) (sp-≤-r sp-A)
+
+≤-inv-sp-ord : ∀ {A A₁ A₂ B}
+  → A ≤ B
+  → A₁ ⇜ A ⇝ A₂
+  → ord B
+  → (A₁ ≤ B) ⊎ (A₂ ≤ B)
+≤-inv-sp-ord (≤-top x x₁) sp-A ord-B = inj₁ (≤-top ord-B x₁)
+≤-inv-sp-ord (≤-⇒ C≤A B≤D x) (sp-⇒ sp-B) (ord-⇒ ord-D) with ≤-inv-sp-ord B≤D sp-B ord-D
+... | inj₁ y = inj₁ (≤-⇒ C≤A y x)
+... | inj₂ y = inj₂ (≤-⇒ C≤A y x)
+≤-inv-sp-ord (≤-& x A≤B A≤B₁) sp-A ord-B = ⊥-elim (sp-¬ord x ord-B)
+≤-inv-sp-ord (≤-&-l A≤B x) sp-& ord-B = inj₁ A≤B
+≤-inv-sp-ord (≤-&-r A≤B x) sp-& ord-B = inj₂ A≤B
+
+≤-inv-sp-l : ∀ {A B B₁ B₂}
   → A ≤ B
   → B₁ ⇜ B ⇝ B₂
   → A ≤ B₁
-≤-sp-l (≤-top Bᵒ tl) Bˢ = ⊥-elim (sp-¬ord Bˢ Bᵒ)
-≤-sp-l (≤-⇒ B≤D C≤A Dᵒ) (sp-⇒ Dˢ) = ⊥-elim (sp-¬ord Dˢ Dᵒ)
-≤-sp-l (≤-& Bˢ₁ A≤B₃ A≤B₄) Bˢ₂ rewrite sp-determinism₁ Bˢ₁ Bˢ₂ = A≤B₃
-≤-sp-l (≤-&-l A≤B₂ B₂ᵒ) B₂ˢ = ⊥-elim (sp-¬ord B₂ˢ B₂ᵒ)
-≤-sp-l (≤-&-r B≤B₂ B₂ᵒ) B₂ˢ = ⊥-elim (sp-¬ord B₂ˢ B₂ᵒ)
+≤-inv-sp-l (≤-top Bᵒ tl) Bˢ = ⊥-elim (sp-¬ord Bˢ Bᵒ)
+≤-inv-sp-l (≤-⇒ B≤D C≤A Dᵒ) (sp-⇒ Dˢ) = ⊥-elim (sp-¬ord Dˢ Dᵒ)
+≤-inv-sp-l (≤-& Bˢ₁ A≤B₃ A≤B₄) Bˢ₂ rewrite sp-determinism₁ Bˢ₁ Bˢ₂ = A≤B₃
+≤-inv-sp-l (≤-&-l A≤B₂ B₂ᵒ) B₂ˢ = ⊥-elim (sp-¬ord B₂ˢ B₂ᵒ)
+≤-inv-sp-l (≤-&-r B≤B₂ B₂ᵒ) B₂ˢ = ⊥-elim (sp-¬ord B₂ˢ B₂ᵒ)
+
+≤-inv-sp-r : ∀ {A B B₁ B₂}
+  → A ≤ B
+  → B₁ ⇜ B ⇝ B₂
+  → A ≤ B₂
+≤-inv-sp-r (≤-top Bᵒ tl) Bˢ = ⊥-elim (sp-¬ord Bˢ Bᵒ)
+≤-inv-sp-r (≤-⇒ B≤D C≤A Dᵒ) (sp-⇒ Dˢ) = ⊥-elim (sp-¬ord Dˢ Dᵒ)
+≤-inv-sp-r (≤-& Bˢ₁ A≤B₃ A≤B₄) Bˢ₂ rewrite sp-determinism₂ Bˢ₁ Bˢ₂ = A≤B₄
+≤-inv-sp-r (≤-&-l A≤B₂ B₂ᵒ) B₂ˢ = ⊥-elim (sp-¬ord B₂ˢ B₂ᵒ)
+≤-inv-sp-r (≤-&-r B≤B₂ B₂ᵒ) B₂ˢ = ⊥-elim (sp-¬ord B₂ˢ B₂ᵒ)
+
+≤-toplike-preservation : ∀ {A B : Type}
+  → ⌉ A ⌈
+  → A ≤ B
+  → ⌉ B ⌈
+≤-toplike-preservation tl-A (≤-top x x₁) = x₁
+≤-toplike-preservation (tl-⇒ tl-A) (≤-⇒ A≤B A≤B₁ x) = tl-⇒ (≤-toplike-preservation tl-A A≤B₁)
+≤-toplike-preservation tl-A (≤-& x A≤B A≤B₁) = sp-toplike x (≤-toplike-preservation tl-A A≤B) (≤-toplike-preservation tl-A A≤B₁)
+≤-toplike-preservation (tl-& tl-A tl-A₁) (≤-&-l A≤B x) = ≤-toplike-preservation tl-A A≤B
+≤-toplike-preservation (tl-& tl-A tl-A₁) (≤-&-r A≤B x) = ≤-toplike-preservation tl-A₁ A≤B
 
 ≤-trans-p : ∀ {A B C : Type} {p : proper B} → A ≤ B → B ≤ C → A ≤ C
 ≤-trans-p {B = .Int} {p = pr-int} A≤B ≤-int = A≤B
@@ -256,12 +303,24 @@ sp-¬ord (sp-⇒ Aˢ) (ord-⇒ Aᵒ) = sp-¬ord Aˢ Aᵒ
 ≤-trans-p {B = .Top} {p = pr-top} A≤B (≤-top x x₁) = ≤-top x x₁
 ≤-trans-p {B = .Top} {p = pr-top} A≤B (≤-& x B≤C B≤C₁) = ≤-& x (≤-trans-p {p = pr-top} A≤B B≤C) (≤-trans-p {p = pr-top} A≤B B≤C₁)
 ≤-trans-p {B = .(_ ⇒ _)} {p = pr-fun Bᵒ p₁ p₂} A≤B (≤-top x x₁) = ≤-top x x₁
-≤-trans-p {B = .(_ ⇒ _)} {p = pr-fun Bᵒ p₁ p₂} A≤B (≤-⇒ B≤C B≤C₁ x) = {!!}
+≤-trans-p {B = .(_ ⇒ _)} {p = pr-fun Bᵒ p₁ p₂} (≤-top x (tl-⇒ x₁)) (≤-⇒ C≤A₁ B≤D Dᵒ) = ≤-toplike (tl-⇒ (≤-toplike-preservation x₁ B≤D))
+≤-trans-p {B = .(_ ⇒ _)} {p = pr-fun Bᵒ p₁ p₂} (≤-⇒ A≤B A≤B₁ x) (≤-⇒ C≤A₁ B≤D Dᵒ) = ≤-⇒ (≤-trans-p {p = p₁} C≤A₁ A≤B) (≤-trans-p {p = p₂} A≤B₁ B≤D) Dᵒ
+≤-trans-p {B = .(_ ⇒ _)} {p = pr-fun Bᵒ p₁ p₂} (≤-& (sp-⇒ x) A≤B A≤B₁) (≤-⇒ C≤A₁ B≤D Dᵒ) = ⊥-elim (sp-¬ord x Bᵒ)
+≤-trans-p {B = .(_ ⇒ _)} {p = pr-fun Bᵒ p₁ p₂} (≤-&-l A≤B x) (≤-⇒ C≤A₁ B≤D Dᵒ) = ≤-&-l-gen (≤-trans-p {p = pr-fun Bᵒ p₁ p₂} A≤B (≤-⇒ C≤A₁ B≤D Dᵒ))
+≤-trans-p {B = .(_ ⇒ _)} {p = pr-fun Bᵒ p₁ p₂} (≤-&-r A≤B x) (≤-⇒ C≤A₁ B≤D Dᵒ) = ≤-&-r-gen (≤-trans-p {p = pr-fun Bᵒ p₁ p₂} A≤B (≤-⇒ C≤A₁ B≤D Dᵒ))
 ≤-trans-p {B = .(_ ⇒ _)} {p = pr-fun Bᵒ p₁ p₂} A≤B (≤-& x B≤C B≤C₁) = ≤-& x (≤-trans-p {p = pr-fun Bᵒ p₁ p₂} A≤B B≤C) (≤-trans-p {p = pr-fun Bᵒ p₁ p₂} A≤B B≤C₁)
-≤-trans-p {B = B} {p = pr-split x p p₁} A≤B B≤C = {!!}
+≤-trans-p {C = C} {p = pr-split sp-B p₁ p₂} A≤B B≤C with proper-complete C
+≤-trans-p {C = .Int} {pr-split sp-B p₁ p₂} A≤B B≤C | pr-int with ≤-inv-sp-ord B≤C sp-B ord-int
+... | inj₁ x = ≤-trans-p {p = p₁} (≤-inv-sp-l A≤B sp-B) x
+... | inj₂ y = ≤-trans-p {p = p₂} (≤-inv-sp-r A≤B sp-B) y
+≤-trans-p {C = .Top} {pr-split sp-B p₁ p₂} A≤B B≤C | pr-top = ≤-top ord-top tl-top
+≤-trans-p {C = .(_ ⇒ _)} {pr-split sp-B p₁ p₂} A≤B B≤C | pr-fun {A₁} {B₁} ord-B₁ pC pC₁ with ≤-inv-sp-ord B≤C sp-B (ord-⇒ ord-B₁)
+... | inj₁ x = ≤-trans-p {p = p₁} (≤-inv-sp-l A≤B sp-B) x
+... | inj₂ y = ≤-trans-p {p = p₂} (≤-inv-sp-r A≤B sp-B) y
+≤-trans-p {C = C} {pr-split sp-B p₁ p₂} A≤B B≤C | pr-split sp-C pA₁ pA₂ = {!!}
 
 ≤-trans : ∀ {A B C}
   → A ≤ B
   → B ≤ C
   → A ≤ C
-≤-trans = {!!}  
+≤-trans = {!!}

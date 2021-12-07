@@ -317,7 +317,7 @@ sp-iso sp-A = ≤-& sp-& (sp-≤-l sp-A) (sp-≤-r sp-A)
 ≤-trans-p (pr-fun ord-B p₁ p₂) pC (≤-&-r A≤B (ord-⇒ ord-B₁)) (≤-⇒ ≤₁ ≤₂ ord-D) = ≤-&-r-gen (≤-trans-p (pr-fun ord-B₁ p₁ p₂) pC A≤B (≤-⇒ ≤₁ ≤₂ ord-D))
 ≤-trans-p (pr-fun ord-B p₁ p₂) pC A≤B (≤-& {B₁ = B₁} {B₂ = B₂} sp-C ≤₁ ≤₂) = ≤-& sp-C (≤-trans-p (pr-fun ord-B p₁ p₂) (proper-complete B₁) A≤B ≤₁) (≤-trans-p (pr-fun ord-B p₁ p₂) (proper-complete B₂) A≤B ≤₂)
 ≤-trans-p (pr-split sp-B p₁ p₂) pr-int A≤B B≤C with ≤-inv-sp-ord B≤C sp-B ord-int
-... | inj₁ x = ≤-trans-p p₁ pr-int (proj₁ (≤-inv-sp A≤B sp-B)) x
+... | inj₁ x = ≤-trans-p p₁ pr-int {!!} x
 ... | inj₂ y = ≤-trans-p p₂ pr-int (proj₂ (≤-inv-sp A≤B sp-B)) y
 ≤-trans-p (pr-split sp-B p₁ p₂) pr-top A≤B B≤C = ≤-top ord-top tl-top
 ≤-trans-p (pr-split sp-B p₁ p₂) (pr-fun ord-B p₃ p₄) A≤B B≤C with ≤-inv-sp-ord B≤C sp-B (ord-⇒ ord-B)
@@ -339,4 +339,10 @@ sp-iso sp-A = ≤-& sp-& (sp-≤-l sp-A) (sp-≤-r sp-A)
 ≤-trans {B = .(_ ⇒ _)} (≤-&-l A≤B (ord-⇒ x₂)) (≤-⇒ B≤C B≤C₁ x₁) | pr-fun x ors ors₁ = ≤-&-l (≤-trans A≤B (≤-⇒ B≤C B≤C₁ x₁)) (ord-⇒ x₁)
 ≤-trans {B = .(_ ⇒ _)} (≤-&-r A≤B x₂) (≤-⇒ B≤C B≤C₁ x₁) | pr-fun x ors ors₁ = ≤-&-r (≤-trans A≤B (≤-⇒ B≤C B≤C₁ x₁)) (ord-⇒ x₁)
 ≤-trans {B = .(_ ⇒ _)} A≤B (≤-& x₁ B≤C B≤C₁) | pr-fun x ors ors₁ = ≤-& x₁ (≤-trans A≤B B≤C) (≤-trans A≤B B≤C₁)
-... | pr-split x ors ors₁ = {!!}
+≤-trans {A = A} {C = C} A≤B B≤C | pr-split {A₂ = A₂} x ors ors₁ with proper-complete C
+≤-trans {A = A} {_} {C = .Int} A≤B B≤C | pr-split {A₂ = A₂} x ors ors₁ | pr-int with ≤-trans (≤-inv-sp-l A≤B x) | ≤-inv-sp-ord B≤C x ord-int
+... | rec | inj₁ x₁ = rec x₁
+... | rec | inj₂ y = {!!}
+≤-trans {A = A} {_} {C = .Top} A≤B B≤C | pr-split {A₂ = A₂} x ors ors₁ | pr-top = {!!}
+≤-trans {A = A} {_} {C = .(_ ⇒ _)} A≤B B≤C | pr-split {A₂ = A₂} x ors ors₁ | pr-fun x₁ orcs orcs₁ = {!!}
+≤-trans {A = A} {_} {C = C} A≤B B≤C | pr-split {A₂ = A₂} x ors ors₁ | pr-split x₁ orcs orcs₁ = {!!}

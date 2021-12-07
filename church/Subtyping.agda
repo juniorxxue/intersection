@@ -5,6 +5,7 @@ open Eq using (_≡_; refl; cong; subst)
 open import Relation.Nullary using (¬_)
 open import Data.Empty using (⊥; ⊥-elim)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
+open import Data.Product using (_×_; proj₁; proj₂) renaming (_,_ to ⟨_,_⟩)
 
 infixr 7 _⇒_
 infixr 7 _&_
@@ -286,39 +287,23 @@ sp-iso sp-A = ≤-& sp-& (sp-≤-l sp-A) (sp-≤-r sp-A)
 ≤-inv-sp-r (≤-&-l A≤B₂ B₂ᵒ) B₂ˢ = ⊥-elim (sp-¬ord B₂ˢ B₂ᵒ)
 ≤-inv-sp-r (≤-&-r B≤B₂ B₂ᵒ) B₂ˢ = ⊥-elim (sp-¬ord B₂ˢ B₂ᵒ)
 
+≤-inv-sp : ∀ {A B B₁ B₂}
+  → A ≤ B
+  → B₁ ⇜ B ⇝ B₂
+  → (A ≤ B₁) × (A ≤ B₂)
+≤-inv-sp A≤B sp-B = ⟨ ≤-inv-sp-l A≤B sp-B , ≤-inv-sp-r A≤B sp-B ⟩
+
 ≤-toplike-preservation : ∀ {A B : Type}
   → ⌉ A ⌈
   → A ≤ B
   → ⌉ B ⌈
 ≤-toplike-preservation tl-A (≤-top x x₁) = x₁
-≤-toplike-preservation tl-A (≤-⇒ subAB subAB₁ x) = tl-⇒ {!!}
-≤-toplike-preservation tl-A (≤-& x subAB subAB₁) = {!!}
-≤-toplike-preservation tl-A (≤-&-l subAB x) = {!!}
-≤-toplike-preservation tl-A (≤-&-r subAB x) = {!!}
-proper-inv-split-l :  ∀ {A A₁ A₂}
-    → A₁ ⇜ A ⇝ A₂
-    → proper A
-    → proper A₁
-proper-inv-split-l (sp-⇒ sp-A) (pr-fun x p-A p-A₁) = ⊥-elim (sp-¬ord sp-A x)
-proper-inv-split-l sp-A (pr-split x p-A p-A₁) rewrite sp-determinism₁ x sp-A = p-A
+≤-toplike-preservation (tl-⇒ tl-A) (≤-⇒ A≤B A≤B₁ x) = tl-⇒ (≤-toplike-preservation tl-A A≤B₁)
+≤-toplike-preservation tl-A (≤-& x A≤B A≤B₁) = sp-toplike x (≤-toplike-preservation tl-A A≤B) (≤-toplike-preservation tl-A A≤B₁)
+≤-toplike-preservation (tl-& tl-A tl-A₁) (≤-&-l A≤B x) = ≤-toplike-preservation tl-A A≤B
+≤-toplike-preservation (tl-& tl-A tl-A₁) (≤-&-r A≤B x) = ≤-toplike-preservation tl-A₁ A≤B
 
-proper-inv-split-r :  ∀ {A A₁ A₂}
-    → A₁ ⇜ A ⇝ A₂
-    → proper A
-    → proper A₂
-proper-inv-split-r (sp-⇒ sp-A) (pr-fun x p-A p-A₁) = ⊥-elim (sp-¬ord sp-A x)
-proper-inv-split-r sp-A (pr-split x p-A p-A₁) rewrite sp-determinism₂ x sp-A = p-A₁
-
-≤-trans-p-sp : ∀ {A B B₁ B₂ C : Type}  → proper C → B₁ ⇜ B ⇝ B₂ → A ≤ B → B ≤ C → A ≤ C  
 ≤-trans-p : ∀ {A B C : Type} → proper B → proper C → A ≤ B → B ≤ C → A ≤ C
-
-≤-trans-p-sp {B₁ = B₁} {B₂ = B₂} pr-int sp-B A≤B B≤C with ≤-inv-sp-ord B≤C sp-B ord-int
-... | inj₁ x = ≤-trans-p (proper-complete B₁) pr-int (≤-inv-sp-l A≤B sp-B) x
-... | inj₂ y = {!!}
-≤-trans-p-sp pr-top sp-B A≤B B≤C = {!!}
-≤-trans-p-sp (pr-fun x pC pC₁) sp-B A≤B B≤C = {!!}
-≤-trans-p-sp (pr-split x pC pC₁) sp-B A≤B B≤C = {!!}
-
 ≤-trans-p pr-int pC A≤B ≤-int = A≤B
 ≤-trans-p pr-int pC A≤B (≤-top ord-C tl-C) = ≤-top ord-C tl-C
 ≤-trans-p pr-int pC A≤B (≤-& {B₁ = B₁} {B₂ = B₂} sp-C ≤₁ ≤₂) = ≤-& sp-C (≤-trans-p pr-int (proper-complete B₁) A≤B ≤₁) (≤-trans-p pr-int (proper-complete B₂) A≤B ≤₂)
@@ -328,7 +313,30 @@ proper-inv-split-r sp-A (pr-split x p-A p-A₁) rewrite sp-determinism₂ x sp-A
 ≤-trans-p (pr-fun ord-B p₁ p₂) pC (≤-top (ord-⇒ ord-B′) (tl-⇒ tl-B)) (≤-⇒ ≤₁ ≤₂ ord-D) = ≤-top (ord-⇒ ord-D) (tl-⇒ (≤-toplike-preservation tl-B ≤₂))
 ≤-trans-p (pr-fun ord-B p₁ p₂) pC (≤-⇒ {A = A} ≤₃ ≤₄ ord-B₁) (≤-⇒ {D = D} ≤₁ ≤₂ ord-D) = ≤-⇒ (≤-trans-p p₁ (proper-complete A) ≤₁ ≤₃) (≤-trans-p p₂ (proper-complete D) ≤₄ ≤₂) ord-D
 ≤-trans-p (pr-fun ord-B p₁ p₂) pC (≤-& (sp-⇒ sp-B) ≤₃ ≤₄) (≤-⇒ ≤₁ ≤₂ ord-D) = ⊥-elim (sp-¬ord sp-B ord-B)
-≤-trans-p (pr-fun ord-B p₁ p₂) pC (≤-&-l A≤B (ord-⇒ ord-B₁)) (≤-⇒ ≤₁ ≤₂ ord-D) = ≤-&-l-gen (≤-trans-p (pr-fun ord-B₁ p₁ p₂) pC A≤B (≤-⇒ ≤₁ ≤₂ ord-D)) -- kinda dangerous
+≤-trans-p (pr-fun ord-B p₁ p₂) pC (≤-&-l A≤B (ord-⇒ ord-B₁)) (≤-⇒ ≤₁ ≤₂ ord-D) = ≤-&-l-gen (≤-trans-p (pr-fun ord-B₁ p₁ p₂) pC A≤B (≤-⇒ ≤₁ ≤₂ ord-D))
 ≤-trans-p (pr-fun ord-B p₁ p₂) pC (≤-&-r A≤B (ord-⇒ ord-B₁)) (≤-⇒ ≤₁ ≤₂ ord-D) = ≤-&-r-gen (≤-trans-p (pr-fun ord-B₁ p₁ p₂) pC A≤B (≤-⇒ ≤₁ ≤₂ ord-D))
 ≤-trans-p (pr-fun ord-B p₁ p₂) pC A≤B (≤-& {B₁ = B₁} {B₂ = B₂} sp-C ≤₁ ≤₂) = ≤-& sp-C (≤-trans-p (pr-fun ord-B p₁ p₂) (proper-complete B₁) A≤B ≤₁) (≤-trans-p (pr-fun ord-B p₁ p₂) (proper-complete B₂) A≤B ≤₂)
-≤-trans-p (pr-split sp-B p₁ p₂) pC A≤B B≤C = ≤-trans-p-sp pC sp-B A≤B B≤C
+≤-trans-p (pr-split sp-B p₁ p₂) pr-int A≤B B≤C with ≤-inv-sp-ord B≤C sp-B ord-int
+... | inj₁ x = ≤-trans-p p₁ pr-int (proj₁ (≤-inv-sp A≤B sp-B)) x
+... | inj₂ y = ≤-trans-p p₂ pr-int (proj₂ (≤-inv-sp A≤B sp-B)) y
+≤-trans-p (pr-split sp-B p₁ p₂) pr-top A≤B B≤C = ≤-top ord-top tl-top
+≤-trans-p (pr-split sp-B p₁ p₂) (pr-fun ord-B p₃ p₄) A≤B B≤C with ≤-inv-sp-ord B≤C sp-B (ord-⇒ ord-B)
+... | inj₁ x = ≤-trans-p p₁ (pr-fun ord-B p₃ p₄) (proj₁ (≤-inv-sp A≤B sp-B)) x
+... | inj₂ y = ≤-trans-p p₂ {!!} {!!} y
+≤-trans-p (pr-split sp-B p₁ p₂) (pr-split x pC pC₁) A≤B B≤C = {!!}
+
+≤-trans : {A B C : Type} → A ≤ B → B ≤ C → A ≤ C
+≤-trans {B = B} A≤B B≤C with proper-complete B
+≤-trans {B = .Int} A≤B ≤-int | pr-int = A≤B
+≤-trans {B = .Int} A≤B (≤-top x x₁) | pr-int = ≤-top x x₁
+≤-trans {B = .Int} A≤B (≤-& x B≤C B≤C₁) | pr-int = ≤-& x (≤-trans A≤B B≤C) (≤-trans A≤B B≤C₁)
+≤-trans {B = .Top} A≤B (≤-top x x₁) | pr-top = ≤-top x x₁
+≤-trans {B = .Top} A≤B (≤-& x B≤C B≤C₁) | pr-top = ≤-& x (≤-trans A≤B B≤C) (≤-trans A≤B B≤C₁)
+≤-trans {B = .(_ ⇒ _)} A≤B (≤-top x₁ x₂) | pr-fun x ors ors₁ = ≤-top x₁ x₂
+≤-trans {B = .(_ ⇒ _)} (≤-top (ord-⇒ x₂) (tl-⇒ x₃)) (≤-⇒ B≤C B≤C₁ x₁) | pr-fun x ors ors₁ = ≤-top (ord-⇒ x₁) (tl-⇒ (≤-toplike-preservation x₃ B≤C₁))
+≤-trans {B = .(_ ⇒ _)} (≤-⇒ A≤B A≤B₁ x₂) (≤-⇒ B≤C B≤C₁ x₁) | pr-fun x ors ors₁ = ≤-⇒ (≤-trans B≤C A≤B) (≤-trans A≤B₁ B≤C₁) x₁
+≤-trans {B = .(_ ⇒ _)} (≤-& (sp-⇒ x₂) A≤B A≤B₁) (≤-⇒ B≤C B≤C₁ x₁) | pr-fun x ors ors₁ = ⊥-elim (sp-¬ord x₂ x)
+≤-trans {B = .(_ ⇒ _)} (≤-&-l A≤B (ord-⇒ x₂)) (≤-⇒ B≤C B≤C₁ x₁) | pr-fun x ors ors₁ = ≤-&-l (≤-trans A≤B (≤-⇒ B≤C B≤C₁ x₁)) (ord-⇒ x₁)
+≤-trans {B = .(_ ⇒ _)} (≤-&-r A≤B x₂) (≤-⇒ B≤C B≤C₁ x₁) | pr-fun x ors ors₁ = ≤-&-r (≤-trans A≤B (≤-⇒ B≤C B≤C₁ x₁)) (ord-⇒ x₁)
+≤-trans {B = .(_ ⇒ _)} A≤B (≤-& x₁ B≤C B≤C₁) | pr-fun x ors ors₁ = ≤-& x₁ (≤-trans A≤B B≤C) (≤-trans A≤B B≤C₁)
+... | pr-split x ors ors₁ = {!!}
